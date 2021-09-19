@@ -1,0 +1,19 @@
+# Object files
+*.o
+
+# Linker output
+*.ilk
+*.map
+*.ihx
+
+# GBDK stuff
+*.sym
+*.lst
+*.asm
+
+# Target
+*.gb
+*.gbc
+
+# Saves
+*.zip
