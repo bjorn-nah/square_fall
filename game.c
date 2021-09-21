@@ -11,7 +11,6 @@
 // 0 - wihte
 // 1 - black
 // 2 - grey
-/*
 UBYTE playground[] = {
 	1,  1,  2,  2,  2,  2,  1,  1, 1,
 	1,  2,  2,  2,  2,  2,  2,  1, 1,
@@ -22,7 +21,8 @@ UBYTE playground[] = {
 	1,  2,  2,  2,  2,  2,  1,  1, 1,
 	1,  2,  2,  2,  2,  2,  1,  1, 1,
 	1,  2,  1,  2,  1,  2,  1,  1, 1
-};*/
+};
+/*
 UBYTE playground[] = {
 	1,  1,  0,  0,  0,  0,  1,  1, 1,
 	1,  0,  0,  0,  0,  0,  0,  1, 1,
@@ -33,7 +33,9 @@ UBYTE playground[] = {
 	1,  0,  0,  0,  0,  0,  1,  1, 1,
 	1,  0,  0,  0,  0,  0,  1,  1, 1,
 	1,  0,  1,  0,  1,  0,  1,  1, 1
-};
+};*/
+
+UBYTE playground_old[9*9];
 
 // functions declarations
 void draw_xy(BYTE x, BYTE y, UBYTE color);
@@ -43,6 +45,7 @@ uint8_t get_tile_ul(UBYTE square_color, UBYTE neighbour_color);
 uint8_t get_tile_ur(UBYTE square_color, UBYTE neighbour_color);
 uint8_t get_tile_dl(UBYTE square_color, UBYTE neighbour_color);
 uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color);
+void draw_all();
 
 void move_cursor(int x, int y, uint8_t state);
 void place_cursor(int x, int y);
@@ -52,9 +55,12 @@ void fill_void();
 void delete_zone(int x, int y);
 void fall_y();
 void fall_x();
+void physics_engine();
+uint8_t compare_playgrounds();
+void copy_playgrounds();
 
 // global variables
-uint8_t cursor_x, cursor_y, cursor_state;
+uint8_t cursor_x, cursor_y, cursor_state, action_state;
 
 void run_game(void)
 {
@@ -77,6 +83,7 @@ void run_game(void)
 	cursor_x = 4;
 	cursor_y = 4;
 	cursor_state = WAIT;
+	action_state = WAIT;
 	
 	// sprite load
 	SPRITES_8x8;
@@ -85,26 +92,15 @@ void run_game(void)
 	place_cursor(cursor_x, cursor_y);
 	SHOW_SPRITES;
 	
+	copy_playgrounds();
+	
     // Loop forever
     while(1) {
 
 
 		// Game main loop processing goes here
-		draw_xy(i, j, get_color(i, j));
-		//temp = rand() & 1;
-		//draw_xy(i, j, temp + 1);
-		i++;
-		if(i>8){
-			i = 0;
-			j++;
-		}
-		if(j>8){
-			fall_y();
-			//delete_zone(1, 1);
-			i = 0;
-			j = 0;
-			delay(500);
-		}
+		physics_engine();
+		draw_all();
 		
 		if(cursor_state == WAIT){
 			if(joypad() & J_UP) {
@@ -122,8 +118,15 @@ void run_game(void)
 			move_cursor(cursor_x, cursor_y, cursor_state);
 		}
 		place_cursor(cursor_x, cursor_y);
+		
+		if(action_state == WAIT) {
+			if(joypad() & J_A) {
+				action_state = ACTION_A;
+			}
+		}
+		
 		// if no directions are pressed, resert cursor_state
-		if(!(joypad() & 0x0FU)){
+		if(!(joypad() & 0x0FU) && action_state == WAIT){
 			cursor_state = WAIT;
 		}
 		
@@ -332,6 +335,15 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color){
 	return 0;
 }
 
+void draw_all(){
+	uint8_t i, j;
+	for(i=0; i<9; i++){
+		for(j=0; j<9; j++){
+			draw_xy(i, j, get_color(i, j));
+		}
+	}
+}
+
 // move the custor on the virtual playground
 void move_cursor(int x, int y, uint8_t state){
 	if(state == UP && y > 0){
@@ -418,5 +430,48 @@ void fall_x(){
 				set_color(i+1, j, 0);
 			}
 		}
+	}
+}
+
+void physics_engine(){
+	if(action_state == FILL){
+		fill_void();
+		action_state = WAIT;
+	}
+	if(action_state == FALL_X){
+		copy_playgrounds();
+		fall_x();
+		if(compare_playgrounds()){
+			action_state = FILL;
+		}
+	}
+	if(action_state == FALL_Y){
+		copy_playgrounds();
+		fall_y();
+		if(compare_playgrounds()){
+			action_state = FALL_X;
+		}
+	}
+	if(action_state == ACTION_A){
+		delete_zone(cursor_x,cursor_y);
+		action_state = FALL_Y;
+	}
+}
+
+// retrun 1 if playgrounds are identicals, 0 ether
+uint8_t compare_playgrounds(){
+	uint8_t i;
+	for(i=0; i<81; i++){
+		if(playground[i]!=playground_old[i]){
+			return 0;
+			break;
+		}
+	}
+	return 1;
+}
+void copy_playgrounds(){
+	uint8_t i;
+	for(i=0; i<81; i++){
+		playground_old[i]=playground[i];
 	}
 }
