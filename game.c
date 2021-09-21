@@ -11,6 +11,7 @@
 // 0 - wihte
 // 1 - black
 // 2 - grey
+/*
 UBYTE playground[] = {
 	1,  1,  2,  2,  2,  2,  1,  1, 1,
 	1,  2,  2,  2,  2,  2,  2,  1, 1,
@@ -21,6 +22,17 @@ UBYTE playground[] = {
 	1,  2,  2,  2,  2,  2,  1,  1, 1,
 	1,  2,  2,  2,  2,  2,  1,  1, 1,
 	1,  2,  1,  2,  1,  2,  1,  1, 1
+};*/
+UBYTE playground[] = {
+	1,  1,  0,  0,  0,  0,  1,  1, 1,
+	1,  0,  0,  0,  0,  0,  0,  1, 1,
+	0,  0,  0,  0,  0,  0,  0,  0, 1,
+	0,  0,  1,  0,  1,  0,  0,  0, 1,
+	0,  0,  1,  0,  1,  0,  0,  0, 1,
+	0,  0,  0,  1,  0,  0,  0,  1, 1,
+	1,  0,  0,  0,  0,  0,  1,  1, 1,
+	1,  0,  0,  0,  0,  0,  1,  1, 1,
+	1,  0,  1,  0,  1,  0,  1,  1, 1
 };
 
 // functions declarations
@@ -34,6 +46,12 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color);
 
 void move_cursor(int x, int y, uint8_t state);
 void place_cursor(int x, int y);
+
+void fill_all();
+void fill_void();
+void delete_zone(int x, int y);
+void fall_y();
+void fall_x();
 
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state;
@@ -81,13 +99,11 @@ void run_game(void)
 			j++;
 		}
 		if(j>8){
-			for(i=0; i<9; i++){
-				for(j=0; j<9; j++){
-					playground[j*9+i] = (rand() & 1) + 1;
-				}
-			}
+			fall_y();
+			//delete_zone(1, 1);
 			i = 0;
 			j = 0;
+			delay(500);
 		}
 		
 		if(cursor_state == WAIT){
@@ -336,4 +352,71 @@ void move_cursor(int x, int y, uint8_t state){
 void place_cursor(int x, int y){
 	//move_sprite(0, x*8+8, y*8+16);
 	move_sprite(0, 20 + x*8 + y*8, 84 - x*8 + y*8);
+}
+
+void fill_all(){
+	uint8_t i, j;
+	for(i=0; i<9; i++){
+		for(j=0; j<9; j++){
+			playground[j*9+i] = (rand() & 1) + 1;
+		}
+	}
+}
+
+void fill_void(){
+	uint8_t i, j;
+	for(i=0; i<9; i++){
+		for(j=0; j<9; j++){
+			if(playground[j*9+i] == 0){
+				playground[j*9+i] = (rand() & 1) + 1;
+			}
+		}
+	}
+}
+
+void delete_zone(int x, int y){
+	UBYTE zone_color;
+	zone_color = get_color(x, y);
+	if(zone_color!=0){		// avoid infinite loop by reject the void deleting ;)
+		set_color(x, y, 0);
+		if(zone_color == get_color(x-1, y)){
+			delete_zone(x-1, y);
+		}
+		if(zone_color == get_color(x, y-1)){
+			delete_zone(x, y-1);
+		}
+		if(zone_color == get_color(x+1, y)){
+			delete_zone(x+1, y);
+		}
+		if(zone_color == get_color(x, y+1)){
+			delete_zone(x, y+1);
+		}
+	}
+}
+
+void fall_y(){
+	uint8_t i, j;
+	UBYTE square_color;
+	for(j=8; j>0; j--){
+		for(i=0; i<9; i++){
+			if(get_color(i, j) == 0){
+				square_color = get_color(i, j-1);
+				set_color(i, j, square_color);
+				set_color(i, j-1, 0);
+			}
+		}
+	}
+}
+void fall_x(){
+	uint8_t i, j;
+	UBYTE square_color;
+	for(i=0; i<8; i++){
+		for(j=0; j<9; j++){
+			if(get_color(i, j) == 0){
+				square_color = get_color(i+1, j);
+				set_color(i, j, square_color);
+				set_color(i+1, j, 0);
+			}
+		}
+	}
 }
