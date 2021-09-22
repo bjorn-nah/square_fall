@@ -17,3 +17,6 @@
 
 # Saves
 *.zip
+
+# tools
+*.exe

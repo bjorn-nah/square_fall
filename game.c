@@ -7,6 +7,7 @@
 #include "cursor.c"
 
 #include "game.h"
+#include "lib/utils.h"
 
 // 0 - wihte
 // 1 - black
@@ -53,7 +54,7 @@ void place_cursor(int x, int y);
 
 void fill_all();
 void fill_void();
-void delete_zone(int x, int y);
+uint8_t delete_zone(int x, int y);
 void fall_y();
 void fall_x();
 void physics_engine();
@@ -63,6 +64,7 @@ uint8_t rand_range();
 
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state, action_state;
+uint8_t score;
 
 void run_game(void)
 {
@@ -70,12 +72,12 @@ void run_game(void)
 	
 	// load tiles data
 	set_bkg_data(0, 28, tiles_data);
+	text_load_font();
 	// load map data
 	set_bkg_tiles(0, 0, 20, 18, mergez);
 	// Turns on the background layer
 	SHOW_BKG;
-	// Turns the display back on. 
-	DISPLAY_ON;
+
 	
 	initrand(DIV_REG);
 	
@@ -89,12 +91,17 @@ void run_game(void)
 	
 	// sprite load
 	SPRITES_8x8;
-    set_sprite_data(0, 0, cursor);
+    set_sprite_data(0, 1, cursor);
 	set_sprite_tile(0, 0);
 	place_cursor(cursor_x, cursor_y);
 	SHOW_SPRITES;
-	
+
 	copy_playgrounds();
+	
+	// Turns the display back on. 
+	DISPLAY_ON;
+	
+	text_print_string_bkg(1, 15, "HELLO\nWORLD!");
 	
     // Loop forever
     while(1) {
@@ -488,24 +495,27 @@ void fill_void(){
 	}
 }
 
-void delete_zone(int x, int y){
+uint8_t delete_zone(int x, int y){
 	UBYTE zone_color;
+	uint8_t destroyed;
+	destroyed = 1;
 	zone_color = get_color(x, y);
 	if(zone_color!=0){		// avoid infinite loop by reject the void deleting ;)
 		set_color(x, y, 0);
 		if(zone_color == get_color(x-1, y)){
-			delete_zone(x-1, y);
+			destroyed += delete_zone(x-1, y);
 		}
 		if(zone_color == get_color(x, y-1)){
-			delete_zone(x, y-1);
+			destroyed += delete_zone(x, y-1);
 		}
 		if(zone_color == get_color(x+1, y)){
-			delete_zone(x+1, y);
+			destroyed += delete_zone(x+1, y);
 		}
 		if(zone_color == get_color(x, y+1)){
-			delete_zone(x, y+1);
+			destroyed += delete_zone(x, y+1);
 		}
 	}
+	return destroyed;
 }
 
 void fall_y(){
@@ -555,7 +565,7 @@ void physics_engine(){
 		}
 	}
 	if(action_state == ACTION_A){
-		delete_zone(cursor_x,cursor_y);
+		score = delete_zone(cursor_x,cursor_y);
 		action_state = FALL_Y;
 	}
 }
