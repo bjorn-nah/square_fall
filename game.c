@@ -11,16 +11,17 @@
 // 0 - wihte
 // 1 - black
 // 2 - grey
+// 3 - hard grey
 UBYTE playground[] = {
-	1,  1,  2,  2,  2,  2,  1,  1, 1,
-	1,  2,  2,  2,  2,  2,  2,  1, 1,
-	2,  2,  2,  2,  2,  2,  2,  2, 1,
-	2,  2,  1,  2,  1,  2,  2,  2, 1,
-	2,  2,  1,  2,  1,  2,  2,  2, 1,
-	2,  2,  2,  1,  2,  2,  2,  1, 1,
-	1,  2,  2,  2,  2,  2,  1,  1, 1,
-	1,  2,  2,  2,  2,  2,  1,  1, 1,
-	1,  2,  1,  2,  1,  2,  1,  1, 1
+	1,  1,  2,  2,  2,  2,  1,  1, 3,
+	1,  2,  2,  2,  2,  2,  2,  1, 3,
+	2,  2,  2,  2,  2,  2,  2,  2, 3,
+	2,  2,  1,  2,  1,  2,  2,  2, 3,
+	2,  2,  1,  2,  1,  2,  2,  2, 3,
+	2,  2,  2,  1,  2,  2,  2,  1, 3,
+	1,  2,  2,  2,  2,  2,  1,  1, 3,
+	1,  2,  2,  2,  2,  2,  1,  1, 3,
+	1,  2,  1,  2,  1,  2,  1,  1, 3
 };
 /*
 UBYTE playground[] = {
@@ -58,6 +59,7 @@ void fall_x();
 void physics_engine();
 uint8_t compare_playgrounds();
 void copy_playgrounds();
+uint8_t rand_range();
 
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state, action_state;
@@ -67,7 +69,7 @@ void run_game(void)
 	uint8_t i, j;
 	
 	// load tiles data
-	set_bkg_data(0, 16, tiles_data);
+	set_bkg_data(0, 28, tiles_data);
 	// load map data
 	set_bkg_tiles(0, 0, 20, 18, mergez);
 	// Turns on the background layer
@@ -175,6 +177,9 @@ uint8_t get_tile_ul(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 14;
 			break;
+			case 3 :
+				return 19;
+			break;
 		}
 	}
 	if (square_color == 1){
@@ -188,6 +193,9 @@ uint8_t get_tile_ul(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 10;
 			break;
+			case 3 :
+				return 22;
+			break;
 		}
 	}
 	if (square_color == 2){
@@ -200,6 +208,25 @@ uint8_t get_tile_ul(UBYTE square_color, UBYTE neighbour_color){
 			break;
 			case 2 :
 				return 2;
+			break;
+			case 3 :
+				return 26;
+			break;
+		}
+	}
+	if (square_color == 3){
+		switch (neighbour_color){
+			case 0 :
+				return 18;
+			break;
+			case 1 :
+				return 23;
+			break;
+			case 2 :
+				return 27;
+			break;
+			case 3 :
+				return 3;
 			break;
 		}
 	}
@@ -218,6 +245,9 @@ uint8_t get_tile_ur(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 12;
 			break;
+			case 3 :
+				return 3;
+			break;
 		}
 	}
 	if (square_color == 1){
@@ -231,6 +261,9 @@ uint8_t get_tile_ur(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 8;
 			break;
+			case 3 :
+				return 20;
+			break;
 		}
 	}
 	if (square_color == 2){
@@ -243,6 +276,25 @@ uint8_t get_tile_ur(UBYTE square_color, UBYTE neighbour_color){
 			break;
 			case 2 :
 				return 2;
+			break;
+			case 3 :
+				return 24;
+			break;
+		}
+	}
+	if (square_color == 3){
+		switch (neighbour_color){
+			case 0 :
+				return 16;
+			break;
+			case 1 :
+				return 21;
+			break;
+			case 2 :
+				return 25;
+			break;
+			case 3 :
+				return 3;
 			break;
 		}
 	}
@@ -261,6 +313,9 @@ uint8_t get_tile_dl(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 13;
 			break;
+			case 3 :
+				return 16;
+			break;
 		}
 	}
 	if (square_color == 1){
@@ -274,6 +329,9 @@ uint8_t get_tile_dl(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 9;
 			break;
+			case 3 :
+				return 21;
+			break;
 		}
 	}
 	if (square_color == 2){
@@ -286,6 +344,25 @@ uint8_t get_tile_dl(UBYTE square_color, UBYTE neighbour_color){
 			break;
 			case 2 :
 				return 2;
+			break;
+			case 3 :
+				return 25;
+			break;
+		}
+	}
+	if (square_color == 3){
+		switch (neighbour_color){
+			case 0 :
+				return 17;
+			break;
+			case 1 :
+				return 20;
+			break;
+			case 2 :
+				return 24;
+			break;
+			case 3 :
+				return 3;
 			break;
 		}
 	}
@@ -304,6 +381,9 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 15;
 			break;
+			case 3 :
+				return 18;
+			break;
 		}
 	}
 	if (square_color == 1){
@@ -317,6 +397,9 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color){
 			case 2 :
 				return 11;
 			break;
+			case 3 :
+				return 23;
+			break;
 		}
 	}
 	if (square_color == 2){
@@ -329,6 +412,25 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color){
 			break;
 			case 2 :
 				return 2;
+			break;
+			case 3 :
+				return 27;
+			break;
+		}
+	}
+		if (square_color == 3){
+		switch (neighbour_color){
+			case 0 :
+				return 19;
+			break;
+			case 1 :
+				return 22;
+			break;
+			case 2 :
+				return 26;
+			break;
+			case 3 :
+				return 3;
 			break;
 		}
 	}
@@ -370,7 +472,7 @@ void fill_all(){
 	uint8_t i, j;
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
-			playground[j*9+i] = (rand() & 1) + 1;
+			playground[j*9+i] = rand_range();
 		}
 	}
 }
@@ -380,7 +482,7 @@ void fill_void(){
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			if(playground[j*9+i] == 0){
-				playground[j*9+i] = (rand() & 1) + 1;
+				playground[j*9+i] = rand_range();
 			}
 		}
 	}
@@ -474,4 +576,13 @@ void copy_playgrounds(){
 	for(i=0; i<81; i++){
 		playground_old[i]=playground[i];
 	}
+}
+
+uint8_t rand_range(){
+	uint8_t res;
+	res = 0;
+	while(!res){
+		res = rand() & 3;
+	}
+	return res;
 }
