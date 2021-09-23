@@ -24,20 +24,9 @@ UBYTE playground[] = {
 	1,  2,  2,  2,  2,  2,  1,  1, 3,
 	1,  2,  1,  2,  1,  2,  1,  1, 3
 };
-/*
-UBYTE playground[] = {
-	1,  1,  0,  0,  0,  0,  1,  1, 1,
-	1,  0,  0,  0,  0,  0,  0,  1, 1,
-	0,  0,  0,  0,  0,  0,  0,  0, 1,
-	0,  0,  1,  0,  1,  0,  0,  0, 1,
-	0,  0,  1,  0,  1,  0,  0,  0, 1,
-	0,  0,  0,  1,  0,  0,  0,  1, 1,
-	1,  0,  0,  0,  0,  0,  1,  1, 1,
-	1,  0,  0,  0,  0,  0,  1,  1, 1,
-	1,  0,  1,  0,  1,  0,  1,  1, 1
-};*/
 
 UBYTE playground_old[9*9];
+//UBYTE playground_diff[9*9];
 
 // functions declarations
 void draw_xy(BYTE x, BYTE y, UBYTE color);
@@ -64,7 +53,8 @@ uint8_t rand_range();
 
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state, action_state;
-uint8_t score;
+uint8_t combo;
+uint16_t score;
 
 void run_game(void)
 {
@@ -88,6 +78,7 @@ void run_game(void)
 	cursor_y = 4;
 	cursor_state = WAIT;
 	action_state = WAIT;
+	score = 0;
 	
 	// sprite load
 	SPRITES_8x8;
@@ -101,7 +92,9 @@ void run_game(void)
 	// Turns the display back on. 
 	DISPLAY_ON;
 	
-	text_print_string_bkg(1, 15, "HELLO\nWORLD!");
+	text_print_string_bkg(14, 1, "SCORE:");
+	text_print_string_bkg(1, 15, "CHAIN:");
+	print_uint8_bkg(1, 16, 0, 2);
 	
     // Loop forever
     while(1) {
@@ -110,6 +103,7 @@ void run_game(void)
 		// Game main loop processing goes here
 		physics_engine();
 		draw_all();
+		print_uint16_bkg(14, 2, score, 5);
 		
 		if(cursor_state == WAIT){
 			if(joypad() & J_UP) {
@@ -449,6 +443,10 @@ void draw_all(){
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			draw_xy(i, j, get_color(i, j));
+			/*
+			if(playground_diff[i]){
+				draw_xy(i, j, get_color(i, j));
+			}*/
 		}
 	}
 }
@@ -471,7 +469,6 @@ void move_cursor(int x, int y, uint8_t state){
 
 // place the custor on the real playground
 void place_cursor(int x, int y){
-	//move_sprite(0, x*8+8, y*8+16);
 	move_sprite(0, 20 + x*8 + y*8, 84 - x*8 + y*8);
 }
 
@@ -480,6 +477,7 @@ void fill_all(){
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			playground[j*9+i] = rand_range();
+			//playground_diff[j*9+i]=1;
 		}
 	}
 }
@@ -490,6 +488,7 @@ void fill_void(){
 		for(j=0; j<9; j++){
 			if(playground[j*9+i] == 0){
 				playground[j*9+i] = rand_range();
+				//playground_diff[j*9+i]=1;
 			}
 		}
 	}
@@ -565,7 +564,9 @@ void physics_engine(){
 		}
 	}
 	if(action_state == ACTION_A){
-		score = delete_zone(cursor_x,cursor_y);
+		combo = delete_zone(cursor_x,cursor_y);
+		score += combo;
+		print_uint8_bkg(1, 16, combo, 2);
 		action_state = FALL_Y;
 	}
 }
@@ -581,6 +582,19 @@ uint8_t compare_playgrounds(){
 	}
 	return 1;
 }
+/*uint8_t compare_playgrounds(){
+	uint8_t i, res;
+	res = 1;
+	for(i=0; i<81; i++){
+		if(playground[i]!=playground_old[i]){
+			res = 0;
+			playground_diff[i]=1;
+		}else{
+			playground_diff[i]=0;
+		}
+	}
+	return res;
+}*/
 void copy_playgrounds(){
 	uint8_t i;
 	for(i=0; i<81; i++){
