@@ -47,3 +47,13 @@ void print_uint16_bkg(uint8_t x, uint8_t y, uint16_t var, uint8_t size){
 		var = var/10;
 	}
 }
+
+void clear_bkg(){
+	uint8_t i, j, tile;
+	tile = 0;
+	for(i=0; i<20; i++){
+		for(j=0; j<18; j++){
+			set_bkg_tiles(i, j, 1, 1, &tile);
+		}
+	}
+}

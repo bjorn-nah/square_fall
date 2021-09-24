@@ -1,10 +1,10 @@
+#include "title.h"
 #include "game.h"
-
-// global variables
 
 void main(void)
 {
 	while(1) {
+		run_title();
 		run_game();
     }
 }

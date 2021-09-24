@@ -26,7 +26,6 @@ UBYTE playground[] = {
 };
 
 UBYTE playground_old[9*9];
-//UBYTE playground_diff[9*9];
 
 // functions declarations
 void draw_xy(BYTE x, BYTE y, UBYTE color);
@@ -49,11 +48,12 @@ void fall_x();
 void physics_engine();
 uint8_t compare_playgrounds();
 void copy_playgrounds();
+void init_playgrounds();
 uint8_t rand_range();
 
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state, action_state;
-uint8_t combo;
+uint8_t combo, bomb;
 uint16_t score;
 
 void run_game(void)
@@ -79,6 +79,7 @@ void run_game(void)
 	cursor_state = WAIT;
 	action_state = WAIT;
 	score = 0;
+	bomb = 10;
 	
 	// sprite load
 	SPRITES_8x8;
@@ -86,19 +87,21 @@ void run_game(void)
 	set_sprite_tile(0, 0);
 	place_cursor(cursor_x, cursor_y);
 	SHOW_SPRITES;
-
-	copy_playgrounds();
 	
 	// Turns the display back on. 
 	DISPLAY_ON;
 	
-	text_print_string_bkg(14, 1, "SCORE:");
-	text_print_string_bkg(1, 15, "CHAIN:");
-	print_uint8_bkg(1, 16, 0, 2);
+	text_print_string_bkg(14, 1, "SCORE");
+	text_print_string_bkg(1, 15, "CHAIN");
+	text_print_char_bkg(1, 1, '\\');
+	print_uint8_bkg(1, 16, 0, 2);	//combo
+	print_uint8_bkg(2, 1, bomb, 2);
+	print_uint16_bkg(14, 2, score, 5);
+	
+	init_playgrounds();
 	
     // Loop forever
-    while(1) {
-
+    while(bomb) {
 
 		// Game main loop processing goes here
 		physics_engine();
@@ -136,6 +139,10 @@ void run_game(void)
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
     }
+	clear_bkg();
+	HIDE_SPRITES;
+	DISPLAY_OFF;
+	HIDE_BKG;
 }
 
 void draw_xy(BYTE x, BYTE y, UBYTE color){
@@ -442,11 +449,9 @@ void draw_all(){
 	uint8_t i, j;
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
-			draw_xy(i, j, get_color(i, j));
-			/*
-			if(playground_diff[i]){
+			 if(playground[j*9+i]!=playground_old[j*9+i]){
 				draw_xy(i, j, get_color(i, j));
-			}*/
+			}
 		}
 	}
 }
@@ -477,7 +482,6 @@ void fill_all(){
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			playground[j*9+i] = rand_range();
-			//playground_diff[j*9+i]=1;
 		}
 	}
 }
@@ -488,7 +492,6 @@ void fill_void(){
 		for(j=0; j<9; j++){
 			if(playground[j*9+i] == 0){
 				playground[j*9+i] = rand_range();
-				//playground_diff[j*9+i]=1;
 			}
 		}
 	}
@@ -565,9 +568,13 @@ void physics_engine(){
 	}
 	if(action_state == ACTION_A){
 		combo = delete_zone(cursor_x,cursor_y);
-		score += combo;
 		print_uint8_bkg(1, 16, combo, 2);
+		score += combo;
+		print_uint16_bkg(14, 2, score, 5);
+		bomb--;
+		print_uint8_bkg(2, 1, bomb, 2);
 		action_state = FALL_Y;
+		
 	}
 }
 
@@ -582,24 +589,18 @@ uint8_t compare_playgrounds(){
 	}
 	return 1;
 }
-/*uint8_t compare_playgrounds(){
-	uint8_t i, res;
-	res = 1;
-	for(i=0; i<81; i++){
-		if(playground[i]!=playground_old[i]){
-			res = 0;
-			playground_diff[i]=1;
-		}else{
-			playground_diff[i]=0;
-		}
-	}
-	return res;
-}*/
 void copy_playgrounds(){
 	uint8_t i;
 	for(i=0; i<81; i++){
 		playground_old[i]=playground[i];
 	}
+}
+void init_playgrounds(){
+	uint8_t i;
+	for(i=0; i<81; i++){
+		playground_old[i]=0;
+	}
+	fill_all();
 }
 
 uint8_t rand_range(){
