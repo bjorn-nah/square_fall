@@ -7,6 +7,7 @@ void run_title(void){
 	text_load_font();
 	text_print_string_bkg(1, 1, "SQUARE FALL");
 	text_print_string_bkg(1, 3, "PRESS START");
+	text_print_string_bkg(1, 15, "V 0.1\nWIP FOR GBCOMPO21");
 	SHOW_BKG;
 	DISPLAY_ON;
 	start = 1;
