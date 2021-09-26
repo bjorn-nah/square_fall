@@ -8,6 +8,7 @@
 
 #include "game.h"
 #include "lib/utils.h"
+#include "globals.h"
 
 // 0 - wihte
 // 1 - black
@@ -54,7 +55,6 @@ uint8_t rand_range();
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state, action_state;
 uint8_t combo, bomb;
-uint16_t score;
 
 void run_game(void)
 {
@@ -139,6 +139,7 @@ void run_game(void)
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
     }
+	if(score > hi_score){hi_score = score;}
 	clear_bkg();
 	HIDE_SPRITES;
 	DISPLAY_OFF;
@@ -557,6 +558,8 @@ void physics_engine(){
 		fall_x();
 		if(compare_playgrounds()){
 			action_state = FILL;
+			bomb--;
+			print_uint8_bkg(2, 1, bomb, 2);
 		}
 	}
 	if(action_state == FALL_Y){
@@ -571,8 +574,6 @@ void physics_engine(){
 		print_uint8_bkg(1, 16, combo, 2);
 		score += combo;
 		print_uint16_bkg(14, 2, score, 5);
-		bomb--;
-		print_uint8_bkg(2, 1, bomb, 2);
 		action_state = FALL_Y;
 		
 	}
