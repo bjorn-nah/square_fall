@@ -29,5 +29,5 @@ $(BINS):	$(CSOURCES) $(ASMSOURCES)
 	$(LCC) -o $@ $(CSOURCES) $(ASMSOURCES)
 
 clean:
-	rm -f *.o *.lst *.map *.gb *.ihx *.sym *.cdb *.adb *.asm
+	del *.o *.lst *.map *.ihx *.sym *.cdb *.adb *.asm
 
