@@ -35,6 +35,7 @@ void run_gameover(void){
 		wait_vbl_done();
 		gbt_update();
 	}
+	gbt_stop();
 	DISPLAY_OFF;
 	HIDE_BKG;
 	clear_bkg();

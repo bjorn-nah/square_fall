@@ -53,8 +53,9 @@ void init_playgrounds();
 uint8_t rand_range();
 
 // global variables
-uint8_t cursor_x, cursor_y, cursor_state, action_state;
-uint8_t combo, bomb;
+uint8_t cursor_x, cursor_y, cursor_state, action_state, tics;
+uint8_t combo, bomb, bonus, next_bomb;
+uint16_t new_bomb;
 
 void run_game(void)
 {
@@ -80,6 +81,9 @@ void run_game(void)
 	action_state = WAIT;
 	score = 0;
 	bomb = 10;
+	new_bomb = 64;
+	next_bomb = 64;
+	tics = 0;
 	
 	// sprite load
 	SPRITES_8x8;
@@ -94,9 +98,11 @@ void run_game(void)
 	text_print_string_bkg(14, 1, "SCORE");
 	text_print_string_bkg(1, 15, "CHAIN");
 	text_print_char_bkg(1, 1, '\\');
+	text_print_string_bkg(1, 2, "NEXT");
 	print_uint8_bkg(1, 16, 0, 2);	//combo
 	print_uint8_bkg(2, 1, bomb, 2);
 	print_uint16_bkg(14, 2, score, 5);
+	print_uint8_bkg(1, 3, next_bomb, 2);
 	
 	init_playgrounds();
 	
@@ -106,7 +112,17 @@ void run_game(void)
 		// Game main loop processing goes here
 		physics_engine();
 		draw_all();
-		print_uint16_bkg(14, 2, score, 5);
+		
+		if(tics){
+			if(tics==1){
+				// delete bouns on screen
+				
+				text_print_string_bkg(1, 2, "NEXT");
+				print_uint8_bkg(1, 3, next_bomb, 2);
+				text_print_string_bkg(3, 16, "   ");
+			}
+			tics--;
+		}
 		
 		if(cursor_state == WAIT){
 			if(joypad() & J_UP) {
@@ -572,8 +588,32 @@ void physics_engine(){
 	if(action_state == ACTION_A){
 		combo = delete_zone(cursor_x,cursor_y);
 		print_uint8_bkg(1, 16, combo, 2);
-		score += combo;
+		bonus = combo / 8;
+		if(bonus>0){
+			text_print_char_bkg(3, 16, '+');
+			print_uint8_bkg(4, 16, bonus, 2);
+			tics = 60;
+		}
+		score += combo + bonus;
 		print_uint16_bkg(14, 2, score, 5);
+		if(score >= new_bomb){
+			new_bomb += NEW_BOMB_STEP;
+			bomb++;
+			tics = 60;
+			text_print_string_bkg(1, 2, "NEW\\");
+			text_print_string_bkg(1, 3, "  ");
+		}
+		//print_uint16_bkg(14, 3, new_bomb, 5);
+		next_bomb = new_bomb - score;
+		if(!tics){
+			text_print_string_bkg(1, 2, "NEXT");
+			print_uint8_bkg(1, 3, next_bomb, 2);
+		}
+		if(bonus>0){
+			text_print_char_bkg(3, 16, '+');
+			print_uint8_bkg(4, 16, bonus, 2);
+			tics = 60;
+		}
 		action_state = FALL_Y;
 		
 	}

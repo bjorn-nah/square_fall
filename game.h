@@ -8,4 +8,6 @@
 #define FALL_X 7
 #define FILL 8
 
+#define NEW_BOMB_STEP 32
+
 extern void run_game();
