@@ -105,6 +105,9 @@ void run_game(void)
 	print_uint8_bkg(1, 3, next_bomb, 2);
 	
 	init_playgrounds();
+	draw_all();
+	
+	fade_in(50);
 	
     // Loop forever
     while(bomb) {
@@ -156,6 +159,7 @@ void run_game(void)
         wait_vbl_done();
     }
 	if(score > hi_score){hi_score = score;}
+	fade_out(50);
 	clear_bkg();
 	HIDE_SPRITES;
 	DISPLAY_OFF;
@@ -514,6 +518,8 @@ void fill_void(){
 	}
 }
 
+// I now recursiv function looks like a bad idea on Gameboy
+// 
 uint8_t delete_zone(int x, int y){
 	UBYTE zone_color;
 	uint8_t destroyed;

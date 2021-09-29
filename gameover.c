@@ -24,7 +24,7 @@ void run_gameover(void){
 	SHOW_BKG;
 	DISPLAY_ON;
 	start = 1;
-	
+	fade_reset();
 	while(start){
 		if(!joypad() && start==2) {
 			start = 0;
@@ -36,6 +36,7 @@ void run_gameover(void){
 		gbt_update();
 	}
 	gbt_stop();
+	fade_out(50);
 	DISPLAY_OFF;
 	HIDE_BKG;
 	clear_bkg();

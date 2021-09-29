@@ -57,3 +57,25 @@ void clear_bkg(){
 		}
 	}
 }
+
+// that's fades to white (antifade?)
+void fade_in(uint16_t fade_delay){
+	BGP_REG = PALETTE(WHITE, WHITE, WHITE, SILVER);
+	delay(fade_delay);
+	BGP_REG = PALETTE(WHITE, WHITE, SILVER, GRAY);
+	delay(fade_delay);
+	BGP_REG = PALETTE(WHITE, SILVER, GRAY, BLACK);
+}
+void fade_out(uint16_t fade_delay){
+	BGP_REG = PALETTE(WHITE, WHITE, SILVER, GRAY);
+	delay(fade_delay);
+	BGP_REG = PALETTE(WHITE, WHITE, WHITE, SILVER);
+	delay(fade_delay);
+	BGP_REG = PALETTE(WHITE, WHITE, WHITE, WHITE);
+}
+void fade_set(){
+	BGP_REG = PALETTE(WHITE, WHITE, WHITE, WHITE);
+}
+void fade_reset(){
+	BGP_REG = PALETTE(WHITE, SILVER, GRAY, BLACK);
+}
