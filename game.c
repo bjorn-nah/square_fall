@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <rand.h>
 
-#include "tiles.c"
+// #include "tiles.c"
 #include "map.c"
 #include "cursor.c"
 
@@ -62,8 +62,8 @@ void run_game(void)
 	uint8_t i, j;
 	
 	// load tiles data
-	set_bkg_data(0, 28, tiles_data);
-	text_load_font();
+	// set_bkg_data(0, 28, tiles_data);
+	// text_load_font();
 	// load map data
 	set_bkg_tiles(0, 0, 20, 18, mergez);
 	// Turns on the background layer
@@ -160,6 +160,7 @@ void run_game(void)
     }
 	if(score > hi_score){hi_score = score;}
 	fade_out(50);
+	title_art = rand_range();
 	clear_bkg();
 	HIDE_SPRITES;
 	DISPLAY_OFF;
