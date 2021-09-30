@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <rand.h>
 
-// #include "tiles.c"
+#include "lib/gbt_player.h"
 #include "map.c"
 #include "cursor.c"
 
@@ -27,6 +27,8 @@ UBYTE playground[] = {
 };
 
 UBYTE playground_old[9*9];
+
+extern const unsigned char * song_game_Data[];
 
 // functions declarations
 void draw_xy(BYTE x, BYTE y, UBYTE color);
@@ -61,15 +63,19 @@ void run_game(void)
 {
 	uint8_t i, j;
 	
-	// load tiles data
-	// set_bkg_data(0, 28, tiles_data);
-	// text_load_font();
 	// load map data
 	set_bkg_tiles(0, 0, 20, 18, mergez);
 	// Turns on the background layer
 	SHOW_BKG;
 
+	// init sound player
+	disable_interrupts();
+    gbt_play(song_game_Data, 1, 7);
+    gbt_loop(1);
+    set_interrupts(VBL_IFLAG);
+    enable_interrupts();
 	
+	// init seed for random
 	initrand(DIV_REG);
 	
 	//initialize vars
@@ -115,6 +121,7 @@ void run_game(void)
 		// Game main loop processing goes here
 		physics_engine();
 		draw_all();
+		copy_playgrounds();
 		
 		if(tics){
 			if(tics==1){
@@ -157,10 +164,12 @@ void run_game(void)
 		
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
+		gbt_update();
     }
 	if(score > hi_score){hi_score = score;}
 	fade_out(50);
 	title_art = rand_range();
+	gbt_stop();
 	clear_bkg();
 	HIDE_SPRITES;
 	DISPLAY_OFF;
@@ -596,11 +605,6 @@ void physics_engine(){
 		combo = delete_zone(cursor_x,cursor_y);
 		print_uint8_bkg(1, 16, combo, 2);
 		bonus = combo / 8;
-		if(bonus>0){
-			text_print_char_bkg(3, 16, '+');
-			print_uint8_bkg(4, 16, bonus, 2);
-			tics = 60;
-		}
 		score += combo + bonus;
 		print_uint16_bkg(14, 2, score, 5);
 		if(score >= new_bomb){

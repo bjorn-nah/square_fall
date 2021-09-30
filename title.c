@@ -22,7 +22,7 @@ void run_title(void){
 	text_print_string_bkg(4, 1, "SQUARE  FALL");
 	text_print_string_bkg(4, 3, "PRESS  START");
 	text_print_string_bkg(1, 16, "WIP FOR #GBCOMPO21");
-	text_print_string_bkg(0, 17, "V 0.2");
+	text_print_string_bkg(0, 17, "V 0.3 PARTY VERSION!");
 	text_print_string_bkg(5, 14, "HI -");
 	print_uint16_bkg(10, 14, hi_score, 5);
 	SHOW_BKG;
