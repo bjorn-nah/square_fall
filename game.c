@@ -28,6 +28,9 @@ UBYTE playground[] = {
 
 UBYTE playground_old[9*9];
 
+UBYTE playground_aff01[9*10] =  {0};
+UBYTE playground_aff02[10*9] =  {0};
+
 extern const unsigned char * song_game_Data[];
 
 // functions declarations
@@ -39,6 +42,8 @@ uint8_t get_tile_ur(UBYTE square_color, UBYTE neighbour_color);
 uint8_t get_tile_dl(UBYTE square_color, UBYTE neighbour_color);
 uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color);
 void draw_all();
+void draw_aff01();
+void draw_aff02();
 
 void move_cursor(int x, int y, uint8_t state);
 void place_cursor(int x, int y);
@@ -52,6 +57,7 @@ void physics_engine();
 uint8_t compare_playgrounds();
 void copy_playgrounds();
 void init_playgrounds();
+void reset_playgrounds_aff();
 uint8_t rand_range();
 
 // global variables
@@ -64,7 +70,7 @@ void run_game(void)
 	uint8_t i, j;
 	
 	// load map data
-	set_bkg_tiles(0, 0, 20, 18, mergez);
+	//set_bkg_tiles(0, 0, 20, 18, mergez);
 	// Turns on the background layer
 	SHOW_BKG;
 
@@ -122,6 +128,7 @@ void run_game(void)
 		physics_engine();
 		draw_all();
 		copy_playgrounds();
+		reset_playgrounds_aff();
 		
 		if(tics){
 			if(tics==1){
@@ -200,7 +207,18 @@ UBYTE get_color(BYTE x, BYTE y){
 }
 
 void set_color(BYTE x, BYTE y, UBYTE color){
+	UBYTE neighbour;
 	playground[y*9+x] = color;
+	neighbour = get_color(x,  y-1);
+	playground_aff01[y*9+x] = get_tile_ul(color, neighbour);
+	neighbour = get_color(x,  y+1);
+	playground_aff01[(y+1)*9+x] =  get_tile_dr(color, neighbour);
+	
+	neighbour = get_color(x+1,  y);
+	playground_aff02[y*10+x+1] = get_tile_ur(color, neighbour);
+	neighbour = get_color(x-1,  y);
+	playground_aff02[y*10+x] = get_tile_dl(color, neighbour);
+
 }
 
 // up - left
@@ -477,11 +495,39 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color){
 }
 
 void draw_all(){
+	/*
 	uint8_t i, j;
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			 if(playground[j*9+i]!=playground_old[j*9+i]){
 				draw_xy(i, j, get_color(i, j));
+			}
+		}
+	}*/
+
+	draw_aff01();
+	draw_aff02();
+}
+void draw_aff01(){
+	uint8_t x, y, x_new, y_new;
+	for(x=0; x<9; x++){
+		for(y=0; y<10; y++){
+			if(playground_aff01[y*9+x]!=0){
+				x_new = 1 + x + y;
+				y_new = 8 - x + y;
+				set_bkg_tile_xy(x_new, y_new, playground_aff01[y*9+x]);
+			}
+		}
+	}
+}
+void draw_aff02(){
+	uint8_t x, y, x_new, y_new;
+	for(x=0; x<10; x++){
+		for(y=0; y<9; y++){
+			if(playground_aff02[y*10+x]!=0){
+				x_new = 1 + x + y;
+				y_new = 9 - x + y;
+				set_bkg_tile_xy(x_new, y_new, playground_aff02[y*10+x]);
 			}
 		}
 	}
@@ -513,6 +559,7 @@ void fill_all(){
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			playground[j*9+i] = rand_range();
+			set_color(i, j, playground[j*9+i]);
 		}
 	}
 }
@@ -523,6 +570,7 @@ void fill_void(){
 		for(j=0; j<9; j++){
 			if(playground[j*9+i] == 0){
 				playground[j*9+i] = rand_range();
+				set_color(i, j, playground[j*9+i]);
 			}
 		}
 	}
@@ -653,6 +701,14 @@ void init_playgrounds(){
 		playground_old[i]=0;
 	}
 	fill_all();
+}
+
+void reset_playgrounds_aff(){
+	uint8_t i;
+	for(i=0; i<90; i++){
+		playground_aff01[i]=0;
+		playground_aff02[i]=0;
+	}
 }
 
 uint8_t rand_range(){
