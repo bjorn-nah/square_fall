@@ -61,7 +61,8 @@ void reset_playgrounds_aff();
 uint8_t rand_range();
 
 // global variables
-uint8_t cursor_x, cursor_y, cursor_state, action_state, tics;
+uint8_t cursor_x, cursor_y, cursor_state, action_state, display_state, tics;
+uint8_t tiles_uppdated;
 uint8_t combo, bomb, bonus, next_bomb;
 uint16_t new_bomb;
 
@@ -91,6 +92,8 @@ void run_game(void)
 	cursor_y = 4;
 	cursor_state = WAIT;
 	action_state = WAIT;
+	display_state = DISPLAY;
+	tiles_uppdated = 0;
 	score = 0;
 	bomb = 10;
 	new_bomb = 64;
@@ -117,57 +120,63 @@ void run_game(void)
 	print_uint8_bkg(1, 3, next_bomb, 2);
 	
 	init_playgrounds();
-	draw_all();
+	//draw_all();
 	
 	fade_in(50);
 	
     // Loop forever
     while(bomb) {
 
-		// Game main loop processing goes here
-		physics_engine();
-		draw_all();
-		copy_playgrounds();
-		reset_playgrounds_aff();
-		
-		if(tics){
-			if(tics==1){
-				// delete bouns on screen
-				
-				text_print_string_bkg(1, 2, "NEXT");
-				print_uint8_bkg(1, 3, next_bomb, 2);
-				text_print_string_bkg(3, 16, "   ");
+		// if display_state == WAIT
+		if(!display_state){
+			
+			physics_engine();
+			//draw_all();
+			copy_playgrounds();
+			//reset_playgrounds_aff();
+			
+			if(tics){
+				if(tics==1){
+					// delete bouns on screen
+					
+					text_print_string_bkg(1, 2, "NEXT");
+					print_uint8_bkg(1, 3, next_bomb, 2);
+					text_print_string_bkg(3, 16, "   ");
+				}
+				tics--;
 			}
-			tics--;
+			
+			if(cursor_state == WAIT){
+				if(joypad() & J_UP) {
+					cursor_state = UP;
+				}
+				if(joypad() & J_DOWN) {
+					cursor_state = DOWN;
+				}
+				if(joypad() & J_RIGHT) {
+					cursor_state = RIGHT;
+				}
+				if(joypad() & J_LEFT) {
+					cursor_state = LEFT;
+				}
+				move_cursor(cursor_x, cursor_y, cursor_state);
+			}
+			place_cursor(cursor_x, cursor_y);
+			
+			if(action_state == WAIT) {
+				if(joypad() & J_A) {
+					action_state = ACTION_A;
+				}
+			}
+					
+			// if no directions are pressed, resert cursor_state
+			if(!(joypad() & 0x0FU) && action_state == WAIT){
+				cursor_state = WAIT;
+			}
+		} else{	// if display_state != WAIT
+			draw_all();
 		}
-		
-		if(cursor_state == WAIT){
-			if(joypad() & J_UP) {
-				cursor_state = UP;
-			}
-			if(joypad() & J_DOWN) {
-				cursor_state = DOWN;
-			}
-			if(joypad() & J_RIGHT) {
-				cursor_state = RIGHT;
-			}
-			if(joypad() & J_LEFT) {
-				cursor_state = LEFT;
-			}
-			move_cursor(cursor_x, cursor_y, cursor_state);
-		}
-		place_cursor(cursor_x, cursor_y);
-		
-		if(action_state == WAIT) {
-			if(joypad() & J_A) {
-				action_state = ACTION_A;
-			}
-		}
-		
-		// if no directions are pressed, resert cursor_state
-		if(!(joypad() & 0x0FU) && action_state == WAIT){
-			cursor_state = WAIT;
-		}
+
 		
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
@@ -208,6 +217,9 @@ UBYTE get_color(BYTE x, BYTE y){
 
 void set_color(BYTE x, BYTE y, UBYTE color){
 	UBYTE neighbour;
+	// enable display
+	display_state = DISPLAY;
+	
 	playground[y*9+x] = color;
 	neighbour = get_color(x,  y-1);
 	playground_aff01[y*9+x] = get_tile_ul(color, neighbour);
@@ -507,6 +519,7 @@ void draw_all(){
 
 	draw_aff01();
 	draw_aff02();
+	display_state = WAIT;
 }
 void draw_aff01(){
 	uint8_t x, y, x_new, y_new;
@@ -632,6 +645,9 @@ void physics_engine(){
 	if(action_state == FILL){
 		fill_void();
 		action_state = WAIT;
+		
+		// enable display
+		//display_state = DISPLAY;
 	}
 	if(action_state == FALL_X){
 		copy_playgrounds();

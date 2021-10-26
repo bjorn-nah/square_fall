@@ -1,5 +1,7 @@
 REM Automatically generated from Makefile
 
+del *.o *.lst *.map *.ihx *.sym *.cdb *.adb *.asm
+
 C:\dev\gameboy\gbdk\bin\lcc -c -o main.o main.c
 C:\dev\gameboy\gbdk\bin\lcc -c -o font.o lib\font.c
 C:\dev\gameboy\gbdk\bin\lcc -c -o utils.o lib\utils.c
