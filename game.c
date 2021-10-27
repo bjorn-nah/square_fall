@@ -120,7 +120,10 @@ void run_game(void)
 	print_uint8_bkg(1, 3, next_bomb, 2);
 	
 	init_playgrounds();
-	//draw_all();
+	
+	while(display_state == DISPLAY){
+		draw_all();
+	}
 	
 	fade_in(50);
 	
@@ -516,19 +519,26 @@ void draw_all(){
 			}
 		}
 	}*/
-
+	tiles_uppdated = 0;
 	draw_aff01();
 	draw_aff02();
-	display_state = WAIT;
+	if(tiles_uppdated < MAX_TULE_PER_SCREEN){
+		display_state = WAIT;
+	}else{
+		display_state = DISPLAY;
+	}
+	print_uint8_bkg(0, 0, tiles_uppdated, 3);
 }
 void draw_aff01(){
 	uint8_t x, y, x_new, y_new;
 	for(x=0; x<9; x++){
 		for(y=0; y<10; y++){
-			if(playground_aff01[y*9+x]!=0){
+			if(playground_aff01[y*9+x]!=0 && tiles_uppdated < MAX_TULE_PER_SCREEN/2){
 				x_new = 1 + x + y;
 				y_new = 8 - x + y;
 				set_bkg_tile_xy(x_new, y_new, playground_aff01[y*9+x]);
+				playground_aff01[y*9+x] = 0;
+				tiles_uppdated++;
 			}
 		}
 	}
@@ -537,10 +547,12 @@ void draw_aff02(){
 	uint8_t x, y, x_new, y_new;
 	for(x=0; x<10; x++){
 		for(y=0; y<9; y++){
-			if(playground_aff02[y*10+x]!=0){
+			if(playground_aff02[y*10+x]!=0 && tiles_uppdated < MAX_TULE_PER_SCREEN){
 				x_new = 1 + x + y;
 				y_new = 9 - x + y;
 				set_bkg_tile_xy(x_new, y_new, playground_aff02[y*10+x]);
+				playground_aff02[y*10+x] = 0;
+				tiles_uppdated++;
 			}
 		}
 	}
