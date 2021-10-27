@@ -16,6 +16,7 @@
 #define DISPLAY 9
 
 #define NEW_BOMB_STEP 32
-#define MAX_TULE_PER_SCREEN 10
+#define MAX_TULE_PER_SCREEN 32
+#define VOID_TULE 255
 
 extern void run_game();

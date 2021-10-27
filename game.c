@@ -533,29 +533,63 @@ void draw_aff01(){
 	uint8_t x, y, x_new, y_new;
 	for(x=0; x<9; x++){
 		for(y=0; y<10; y++){
-			if(playground_aff01[y*9+x]!=0 && tiles_uppdated < MAX_TULE_PER_SCREEN/2){
+			if(playground_aff01[y*9+x]!=VOID_TULE && tiles_uppdated < MAX_TULE_PER_SCREEN/2){
 				x_new = 1 + x + y;
 				y_new = 8 - x + y;
 				set_bkg_tile_xy(x_new, y_new, playground_aff01[y*9+x]);
-				playground_aff01[y*9+x] = 0;
+				playground_aff01[y*9+x] = VOID_TULE;
 				tiles_uppdated++;
 			}
 		}
 	}
+	/*
+	x = 0;
+	y = 0;
+	while(tiles_uppdated < MAX_TULE_PER_SCREEN/2 && x*y < 9*10 ){
+		if(playground_aff01[y*9+x]!=VOID_TULE){
+			x_new = 1 + x + y;
+			y_new = 8 - x + y;
+			set_bkg_tile_xy(x_new, y_new, playground_aff01[y*9+x]);
+			playground_aff01[y*9+x] = VOID_TULE;
+			tiles_uppdated++;
+		}
+		x++;
+		if(x>=9){
+			x=0;
+			y++;
+		}
+	}*/
 }
 void draw_aff02(){
 	uint8_t x, y, x_new, y_new;
 	for(x=0; x<10; x++){
 		for(y=0; y<9; y++){
-			if(playground_aff02[y*10+x]!=0 && tiles_uppdated < MAX_TULE_PER_SCREEN){
+			if(playground_aff02[y*10+x]!=VOID_TULE && tiles_uppdated < MAX_TULE_PER_SCREEN){
 				x_new = 1 + x + y;
 				y_new = 9 - x + y;
 				set_bkg_tile_xy(x_new, y_new, playground_aff02[y*10+x]);
-				playground_aff02[y*10+x] = 0;
+				playground_aff02[y*10+x] = VOID_TULE;
 				tiles_uppdated++;
 			}
 		}
 	}
+	/*
+	x = 0;
+	y = 0;
+	while(tiles_uppdated < MAX_TULE_PER_SCREEN && x*y < 9*10 ){
+		if(playground_aff02[y*10+x]!=VOID_TULE){
+			x_new = 1 + x + y;
+			y_new = 9 - x + y;
+			set_bkg_tile_xy(x_new, y_new, playground_aff02[y*10+x]);
+			playground_aff02[y*10+x] = VOID_TULE;
+			tiles_uppdated++;
+		}
+		x++;
+		if(x>=10){
+			x=0;
+			y++;
+		}
+	}*/
 }
 
 // move the custor on the virtual playground
@@ -734,8 +768,8 @@ void init_playgrounds(){
 void reset_playgrounds_aff(){
 	uint8_t i;
 	for(i=0; i<90; i++){
-		playground_aff01[i]=0;
-		playground_aff02[i]=0;
+		playground_aff01[i]=VOID_TULE;
+		playground_aff02[i]=VOID_TULE;
 	}
 }
 
