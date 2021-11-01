@@ -26,15 +26,12 @@ UBYTE playground[] = {
 	1,  2,  1,  2,  1,  2,  1,  1, 3
 };
 
-UBYTE playground_old[9*9];
-
 UBYTE playground_aff01[9*10] =  {0};
 UBYTE playground_aff02[10*9] =  {0};
 
 extern const unsigned char * song_game_Data[];
 
 // functions declarations
-void draw_xy(BYTE x, BYTE y, UBYTE color);
 UBYTE get_color(BYTE x, BYTE y);
 void set_color(BYTE x, BYTE y, UBYTE color);
 uint8_t get_tile_ul(UBYTE square_color, UBYTE neighbour_color);
@@ -51,18 +48,15 @@ void place_cursor(int x, int y);
 void fill_all();
 void fill_void();
 uint8_t delete_zone(int x, int y);
-void fall_y();
-void fall_x();
+uint8_t fall_y();
+uint8_t fall_x();
 void physics_engine();
-uint8_t compare_playgrounds();
-void copy_playgrounds();
 void init_playgrounds();
-void reset_playgrounds_aff();
 uint8_t rand_range();
 
 // global variables
 uint8_t cursor_x, cursor_y, cursor_state, action_state, display_state, tics;
-uint8_t tiles_uppdated;
+//uint8_t tiles_uppdated;
 uint8_t combo, bomb, bonus, next_bomb;
 uint16_t new_bomb;
 
@@ -71,7 +65,7 @@ void run_game(void)
 	uint8_t i, j;
 	
 	// load map data
-	//set_bkg_tiles(0, 0, 20, 18, mergez);
+	set_bkg_tiles(0, 0, 20, 18, mergez);
 	// Turns on the background layer
 	SHOW_BKG;
 
@@ -93,7 +87,7 @@ void run_game(void)
 	cursor_state = WAIT;
 	action_state = WAIT;
 	display_state = DISPLAY;
-	tiles_uppdated = 0;
+	//tiles_uppdated = 0;
 	score = 0;
 	bomb = 10;
 	new_bomb = 64;
@@ -134,9 +128,6 @@ void run_game(void)
 		if(!display_state){
 			
 			physics_engine();
-			//draw_all();
-			copy_playgrounds();
-			//reset_playgrounds_aff();
 			
 			if(tics){
 				if(tics==1){
@@ -176,7 +167,8 @@ void run_game(void)
 			if(!(joypad() & 0x0FU) && action_state == WAIT){
 				cursor_state = WAIT;
 			}
-		} else{	// if display_state != WAIT
+		} 
+		else{	// if display_state != WAIT
 			draw_all();
 		}
 
@@ -193,21 +185,6 @@ void run_game(void)
 	HIDE_SPRITES;
 	DISPLAY_OFF;
 	HIDE_BKG;
-}
-
-void draw_xy(BYTE x, BYTE y, UBYTE color){
-	UBYTE neighbour;
-	uint8_t x_new, y_new;
-	x_new = 1 + x + y;
-	y_new = 8 - x + y;
-	neighbour = get_color(x,  y-1);
-	set_bkg_tile_xy(x_new, y_new, get_tile_ul(color, neighbour));
-	neighbour = get_color(x+1,  y);
-	set_bkg_tile_xy(x_new+1, y_new, get_tile_ur(color, neighbour));
-	neighbour = get_color(x-1,  y);
-	set_bkg_tile_xy(x_new, y_new+1, get_tile_dl(color, neighbour));
-	neighbour = get_color(x,  y+1);
-	set_bkg_tile_xy(x_new+1, y_new+1, get_tile_dr(color, neighbour));
 }
 
 UBYTE get_color(BYTE x, BYTE y){
@@ -511,14 +488,6 @@ uint8_t get_tile_dr(UBYTE square_color, UBYTE neighbour_color){
 
 void draw_all(){
 	/*
-	uint8_t i, j;
-	for(i=0; i<9; i++){
-		for(j=0; j<9; j++){
-			 if(playground[j*9+i]!=playground_old[j*9+i]){
-				draw_xy(i, j, get_color(i, j));
-			}
-		}
-	}*/
 	tiles_uppdated = 0;
 	draw_aff01();
 	draw_aff02();
@@ -528,68 +497,38 @@ void draw_all(){
 		display_state = DISPLAY;
 	}
 	print_uint8_bkg(0, 0, tiles_uppdated, 3);
+	*/
+	draw_aff01();
+	draw_aff02();
+	display_state = WAIT;
 }
 void draw_aff01(){
 	uint8_t x, y, x_new, y_new;
 	for(x=0; x<9; x++){
 		for(y=0; y<10; y++){
-			if(playground_aff01[y*9+x]!=VOID_TULE && tiles_uppdated < MAX_TULE_PER_SCREEN/2){
+			if(playground_aff01[y*9+x]!=VOID_TULE){
 				x_new = 1 + x + y;
 				y_new = 8 - x + y;
 				set_bkg_tile_xy(x_new, y_new, playground_aff01[y*9+x]);
 				playground_aff01[y*9+x] = VOID_TULE;
-				tiles_uppdated++;
+				//tiles_uppdated++;
 			}
 		}
 	}
-	/*
-	x = 0;
-	y = 0;
-	while(tiles_uppdated < MAX_TULE_PER_SCREEN/2 && x*y < 9*10 ){
-		if(playground_aff01[y*9+x]!=VOID_TULE){
-			x_new = 1 + x + y;
-			y_new = 8 - x + y;
-			set_bkg_tile_xy(x_new, y_new, playground_aff01[y*9+x]);
-			playground_aff01[y*9+x] = VOID_TULE;
-			tiles_uppdated++;
-		}
-		x++;
-		if(x>=9){
-			x=0;
-			y++;
-		}
-	}*/
 }
 void draw_aff02(){
 	uint8_t x, y, x_new, y_new;
 	for(x=0; x<10; x++){
 		for(y=0; y<9; y++){
-			if(playground_aff02[y*10+x]!=VOID_TULE && tiles_uppdated < MAX_TULE_PER_SCREEN){
+			if(playground_aff02[y*10+x]!=VOID_TULE){
 				x_new = 1 + x + y;
 				y_new = 9 - x + y;
 				set_bkg_tile_xy(x_new, y_new, playground_aff02[y*10+x]);
 				playground_aff02[y*10+x] = VOID_TULE;
-				tiles_uppdated++;
+				//tiles_uppdated++;
 			}
 		}
 	}
-	/*
-	x = 0;
-	y = 0;
-	while(tiles_uppdated < MAX_TULE_PER_SCREEN && x*y < 9*10 ){
-		if(playground_aff02[y*10+x]!=VOID_TULE){
-			x_new = 1 + x + y;
-			y_new = 9 - x + y;
-			set_bkg_tile_xy(x_new, y_new, playground_aff02[y*10+x]);
-			playground_aff02[y*10+x] = VOID_TULE;
-			tiles_uppdated++;
-		}
-		x++;
-		if(x>=10){
-			x=0;
-			y++;
-		}
-	}*/
 }
 
 // move the custor on the virtual playground
@@ -660,54 +599,60 @@ uint8_t delete_zone(int x, int y){
 	return destroyed;
 }
 
-void fall_y(){
-	uint8_t i, j;
+uint8_t fall_y(){
+	uint8_t i, j, same;
 	UBYTE square_color;
+	same = 1;	// init return value to false
 	for(j=8; j>0; j--){
 		for(i=0; i<9; i++){
 			if(get_color(i, j) == 0){
 				square_color = get_color(i, j-1);
-				set_color(i, j, square_color);
-				set_color(i, j-1, 0);
+				if(square_color!=0){
+					set_color(i, j, square_color);
+					set_color(i, j-1, 0);
+					same = 0;
+				}
 			}
 		}
-	}
+	}	
+	return same;
 }
-void fall_x(){
-	uint8_t i, j;
+uint8_t fall_x(){
+	uint8_t i, j, same;
 	UBYTE square_color;
+	same = 1;	// init return value to false
 	for(i=0; i<8; i++){
 		for(j=0; j<9; j++){
 			if(get_color(i, j) == 0){
 				square_color = get_color(i+1, j);
-				set_color(i, j, square_color);
-				set_color(i+1, j, 0);
+				if(square_color!=0){
+					set_color(i, j, square_color);
+					set_color(i+1, j, 0);
+					same = 0;
+				}
 			}
 		}
 	}
+	return same;
 }
 
 void physics_engine(){
+	uint8_t same;
 	if(action_state == FILL){
 		fill_void();
 		action_state = WAIT;
-		
-		// enable display
-		//display_state = DISPLAY;
 	}
 	if(action_state == FALL_X){
-		copy_playgrounds();
-		fall_x();
-		if(compare_playgrounds()){
+		same = fall_x();
+		if(same){
 			action_state = FILL;
 			bomb--;
 			print_uint8_bkg(2, 1, bomb, 2);
 		}
 	}
 	if(action_state == FALL_Y){
-		copy_playgrounds();
-		fall_y();
-		if(compare_playgrounds()){
+		same = fall_y();
+		if(same){
 			action_state = FALL_X;
 		}
 	}
@@ -724,7 +669,6 @@ void physics_engine(){
 			text_print_string_bkg(1, 2, "NEW\\");
 			text_print_string_bkg(1, 3, "  ");
 		}
-		//print_uint16_bkg(14, 3, new_bomb, 5);
 		next_bomb = new_bomb - score;
 		if(!tics){
 			text_print_string_bkg(1, 2, "NEXT");
@@ -740,37 +684,8 @@ void physics_engine(){
 	}
 }
 
-// retrun 1 if playgrounds are identicals, 0 ether
-uint8_t compare_playgrounds(){
-	uint8_t i;
-	for(i=0; i<81; i++){
-		if(playground[i]!=playground_old[i]){
-			return 0;
-			break;
-		}
-	}
-	return 1;
-}
-void copy_playgrounds(){
-	uint8_t i;
-	for(i=0; i<81; i++){
-		playground_old[i]=playground[i];
-	}
-}
 void init_playgrounds(){
-	uint8_t i;
-	for(i=0; i<81; i++){
-		playground_old[i]=0;
-	}
 	fill_all();
-}
-
-void reset_playgrounds_aff(){
-	uint8_t i;
-	for(i=0; i<90; i++){
-		playground_aff01[i]=VOID_TULE;
-		playground_aff02[i]=VOID_TULE;
-	}
 }
 
 uint8_t rand_range(){
