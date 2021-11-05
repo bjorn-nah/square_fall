@@ -1,1 +1,0 @@
-extern void run_game();

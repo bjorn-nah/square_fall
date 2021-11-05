@@ -4,7 +4,6 @@
 
 #include "lib/gbt_player.h"
 #include "map.c"
-#include "cursor.c"
 
 #include "constants.h"
 #include "lib/game_commons.h"
@@ -19,7 +18,7 @@ uint8_t cursor_x, cursor_y, cursor_state, action_state, display_state, tics;
 uint8_t bomb, next_bomb;
 uint16_t new_bomb;
 
-void run_game(void)
+void run_score_attack(void)
 {
 	// load map data
 	set_bkg_tiles(0, 0, 20, 18, mergez);
@@ -48,10 +47,7 @@ void run_game(void)
 	next_bomb = 64;
 	tics = 0;
 	
-	// sprite load
-	SPRITES_8x8;
-    set_sprite_data(0, 1, cursor);
-	set_sprite_tile(0, 0);
+	// sprite init
 	place_cursor(cursor_x, cursor_y);
 	SHOW_SPRITES;
 	

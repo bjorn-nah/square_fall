@@ -18,3 +18,7 @@
 #define NEW_BOMB_STEP 32
 #define MAX_TULE_PER_SCREEN 32
 #define VOID_TULE 255
+
+// game mode
+#define SCORE 1
+#define PUZZLE 2

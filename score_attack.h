@@ -1,0 +1,1 @@
+extern void run_score_attack();
