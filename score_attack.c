@@ -9,6 +9,7 @@
 #include "lib/game_commons.h"
 #include "lib/utils.h"
 #include "globals.h"
+#include "lib/game_vars.h"
 
 extern const unsigned char * song_game_Data[];
 

@@ -43,6 +43,8 @@ uint8_t fall_y();
 uint8_t fall_x();
 uint8_t rand_range();
 
+void load_playground(UBYTE *ground_rle);
+
 UBYTE get_color(BYTE x, BYTE y){
 	if((x >= 0 && x < 9) && (y >= 0 && y < 9)){
 		return playground[y*9+x];
@@ -412,8 +414,7 @@ void fill_all(){
 	uint8_t i, j;
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
-			playground[j*9+i] = rand_range();
-			set_color(i, j, playground[j*9+i]);
+			set_color(i, j, rand_range());
 		}
 	}
 }
@@ -423,8 +424,7 @@ void fill_void(){
 	for(i=0; i<9; i++){
 		for(j=0; j<9; j++){
 			if(playground[j*9+i] == 0){
-				playground[j*9+i] = rand_range();
-				set_color(i, j, playground[j*9+i]);
+				set_color(i, j, rand_range());
 			}
 		}
 	}
@@ -551,4 +551,28 @@ uint8_t rand_range(){
 		res = rand() & 3;
 	}
 	return res;
+}
+
+void load_playground(UBYTE *ground_rle){
+	uint8_t i, j, k, rle_iter, number, tile;
+	i = 0;
+	j = 0;
+	rle_iter = 0;
+	while(j<9){
+		number = ground_rle[rle_iter];
+		rle_iter++;
+		tile = ground_rle[rle_iter];
+		for(k = 0; k < number; k++){
+			
+			//playground[i] = tile;
+			set_color(i,j,ground_rle[rle_iter]);
+			i++;
+			if(i==9){
+				i=0;
+				j++;
+			}
+			
+		}		
+		rle_iter++;		
+	}
 }
