@@ -540,6 +540,29 @@ void physics_engine(){
 	}
 }
 
+void physics_puzzle(){
+	uint8_t same, combo;
+	if(action_state == FALL_X){
+		same = fall_x();
+		if(same){
+			action_state = WAIT;
+			bomb--;
+			print_uint8_bkg(2, 1, bomb, 2);
+		}
+	}
+	if(action_state == FALL_Y){
+		same = fall_y();
+		if(same){
+			action_state = FALL_X;
+		}
+	}
+	if(action_state == ACTION_A){
+		combo = delete_zone(cursor_x,cursor_y);
+		print_uint8_bkg(1, 16, combo, 2);
+		action_state = FALL_Y;
+	}
+}
+
 void init_playgrounds(){
 	fill_all();
 }
